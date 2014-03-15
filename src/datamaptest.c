@@ -22,6 +22,9 @@
 char *dbNames[] = {"Clean-Watershed", "Health Corner Stores", "PPR Playgrounds", "PPR Parks", "PPR Recreation Facilities"};
 
 void displayMenu();
+void sig_handler(int sig);
+void sigchld_hanlder(int sig);
+char ** requestHandler(int * dbReq, char** req);
 void stub(char*, int);
 
 
@@ -32,24 +35,23 @@ int main(void)
 	int user_input = -1;		//a +/- integer value for database choice
 	int add_remove = 0;
     int index = 0;
+    char* raw_input = (char*)malloc( 5 * sizeof(char)) ;
     
     int i; // iterator
-	char * choice1 =
-		"http://www.opendataphilly.org/opendata/resource/220/green-stormwater-projects/";
-	char * choice2 =
-		"http://www.opendataphilly.org/opendata/resource/216/healthy-corner-store-locations/";
-	char * choice3 =
-		"http://www.opendataphilly.org/opendata/resource/222/ppr-playgrounds/";
-	char * choice4 =
-		"http://www.opendataphilly.org/opendata/resource/237/ppr-parks/";
-	char * choice5 =
-		"http://www.opendataphilly.org/opendata/resource/231/ppr-recreation-facilities/";
     
     int dbRequest[MAX_DATABASE]; // Stores the users request for the databases to be displayed
     char** objectIDs[MAX_DATABASE]; // Stores the current Object IDs that are submited in DB, for deletion
 
+    signal(SIGINT,  sig_handler);   /* ctrl-c */
+    signal(SIGTSTP, sig_handler); /* ctrl-z */
+    signal(SIGQUIT, sig_handler); /* ctrl-\ */
+    signal(SIGCHLD, sigchld_hanlder)
+    
+    // Init all of the Users dbRequests to zero
+    // and all of the objectIds to NULL
     for ( i = 0; i < MAX_DATABASE; i++){
         dbRequest[i] = 0;
+        objectIDs[i] = NULL;
         printf("dbReq %d", dbRequest[i]);
     }
 		  
@@ -59,53 +61,48 @@ int main(void)
         //Displaying menu
         displayMenu(dbRequest);
         //Get input from user
-        scanf("%d", &user_input);
+        scanf("%s", raw_input);
         
-        //Decrement the user input because
-        index = abs(user_input) - 1 ;
+        //Check if the user is ready to view the inputs
+        if ( strcmp(raw_input, "view") == 0 ){
+            
+            printf("this is view");
+            //Call the function that will spawn the process for threading
+            requestHandler(dbRequest, &objectIDs);
+            
+        }else{ // convert the string to an integer and carry on
+            user_input = atoi(raw_input);
         
-      //printf("User input %d \n", user_input);
-      //printf("User index %d \n", index);
+            //Decrement the user input because
+            index = abs(user_input) - 1 ;
         
-        switch (abs(user_input)) {
-            case 0:
-                break;
-            case 1:
-                dbRequest[index] = user_input;
-                //stub(choice1, add_remove);
-                break;
-            case 2:
-                dbRequest[index] = user_input;
-                //stub(choice2, add_remove);
-                break;
-            case 3:
-                dbRequest[index] = user_input;
-                //stub(choice3, add_remove);
-                break;
-            case 4:
-                dbRequest[index] = user_input;
-                //stub(choice4, add_remove);
-                break;
-            case 5:
-                dbRequest[index] = user_input;
-                //stub(choice5, add_remove);
-                break;
-            default:
-                printf("Please enter the correct input.");
-                //fflush(stdout);
-                break;
-        }// switch
+            switch (abs(user_input)) {
+                case 0:
+                    break;
+                case 1:
+                    dbRequest[index] = user_input;
+                    break;
+                case 2:
+                    dbRequest[index] = user_input;
+                    break;
+                case 3:
+                    dbRequest[index] = user_input;
+                    break;
+                case 4:
+                    dbRequest[index] = user_input;
+                    break;
+                case 5:
+                    dbRequest[index] = user_input;
+                    break;
+                default:
+                    printf("Please enter the correct input.");
+                    fflush(stdout);
+                    break;
+            }// switch
+        }
 	}//while
 	return 0;
 }// main
-
-void stub(char * user_choice, int add_rem) {
-	if(add_rem == 1)
-		printf("User wants to add data ");
-	else
-		printf("User wants to remove data ");
-	printf("from %s\n", user_choice);
-}
 
 void displayMenu(int * dbReq){
     
@@ -132,4 +129,43 @@ void displayMenu(int * dbReq){
         printf("\nYou can add or remove databases at your discretion.\n");
         printf("Once you have made your desired selections enter 'view'\n");
         printf("To exit, type 0 (zero) to quit the application.\n");
+}
+
+void stub(char * user_choice, int add_rem) {
+    
+	if(add_rem == 1)
+		printf("User wants to add data ");
+	else
+		printf("User wants to remove data ");
+	printf("from %s\n", user_choice);
+    
+}
+void requestHandler(int * dbReq, char *** ids){
+    
+    pid_t = pid;
+    
+    if ( (pid = fork()) == 0 ){
+        // read the request
+    }
+
+}
+
+/*
+ * Signal Handlers
+ *
+ * Blocks all calls to kill the program
+ * so the databases can be cleaned up
+ */
+
+void sig_handler(int sig){
+    
+    printf("CLEAR ALL OF THE DATABASES\n");
+    
+    exit(0);
+}
+
+void sigchld_hanlder(int sig){
+    
+    printf("One of your children has closed, time to reap");
+    
 }
