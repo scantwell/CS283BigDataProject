@@ -52,7 +52,7 @@ int main(void)
     for ( i = 0; i < MAX_DATABASE; i++){
         dbRequest[i] = 0;
         objectIDs[i] = NULL;
-        printf("dbReq %d", dbRequest[i]);
+       // printf("dbReq %d", dbRequest[i]);
     }
 		  
 	//Execute the read/eval loop
@@ -66,7 +66,7 @@ int main(void)
         //Check if the user is ready to view the inputs
         if ( strcmp(raw_input, "view") == 0 ){
             
-            printf("this is view");
+           // printf("this is view");
             //Call the function that will spawn the process for threading
             requestHandler(dbRequest, (char***)&objectIDs, MAX_DATABASE);
             
