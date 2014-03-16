@@ -14,9 +14,9 @@
 int main()
 {
     char        buffer[MAX_BUFFER];
-    int 			 len;
-    char * 		 hostname = "cloudmine.me";
-    int         port        = 443;
+    int 	len;
+    char * 	hostname = "cloudmine.me";
+    int         port = 443;
     int         s,rc;
 
     struct sockaddr_in serv_addr, cli_addr;
@@ -26,7 +26,8 @@ int main()
     SSL_load_error_strings ();
     SSL_CTX *ssl_ctx = SSL_CTX_new (SSLv23_client_method ());
     
-	 if ( (s = socket(AF_INET, SOCK_STREAM, 0 )) < 0 ){
+
+    if ( (s = socket(AF_INET, SOCK_STREAM, 0 )) < 0 ){
         perror("socket failed");
         return 0;
     }
@@ -54,33 +55,33 @@ int main()
       
     memcpy((void *)&serv_addr.sin_addr, hp->h_addr_list[0], hp->h_length);
 
-	 SSL *conn = SSL_new(ssl_ctx);
+    SSL *conn = SSL_new(ssl_ctx);
     SSL_set_fd(conn, s);
     
-	 if ( connect(s, (struct sockaddr *)&serv_addr, sizeof(serv_addr) )){
+    if ( connect(s, (struct sockaddr *)&serv_addr, sizeof(serv_addr) )){
         perror("connect failed");
         return 0;
     }
 
-	 if ( SSL_connect(conn) <= 0 ){
-		 printf("connection error");
-	 }
+    if ( SSL_connect(conn) <= 0 ){
+	 printf("connection error");
+    }
 
     char *header ="GET /v1/app/8b98552e5ad6425283215ea4d4339f7d/text HTTP/1.1\r\nHost: www.cloudmine.me\r\nX-CloudMine-ApiKey: 4a1bbce6b8864246a52262fe920dad52\r\n\r\n"; 
 
-	 //TODO: implement a short write
-  	 if ( (SSL_write( conn, header, strlen(header)+1 )) != strlen(header)+1 ){
+    //TODO: implement a short write
+   if ( (SSL_write( conn, header, strlen(header)+1 )) != strlen(header)+1 ){
         printf("Did not send everything");
     }
 
-	 //TODO: implement a short read
+    //TODO: implement a short read
     len = SSL_read(conn, buffer, MAX_BUFFER-1);
     
-	 printf("BUFFER: %s \n LEN: %d \n", buffer, len+1);
+    printf("BUFFER: %s \n LEN: %d \n", buffer, len+1);
     
-	 SSL_shutdown(conn);
-	 close(s);
-    
+    SSL_shutdown(conn);
+    close(s);
+
     return 0;
 
 }
