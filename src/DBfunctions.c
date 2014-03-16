@@ -11,24 +11,40 @@
 
 char *createDBentry(char *body){
 
-	char* header = "PUT /v1/app/8b98552e5ad6425283215ea4d4339f7d/text HTTP/1.1\r\nHost: www.cloudmine.me\r\nX-CloudMine-ApiKey: 4a1bbce6b8864246a52262fe920dad52\r\nContent-Type: application/json\r\nContent-Length: ";
-
-//int headLen = (strlen(header)+1);
-//int bodyLen = (strlen(body)+1);
-//int totalLen = headLen+bodyLen;
-//int tlen = strlen(body)+1;
-
-strcat(header, "\r\n\r\n");
-//strcat(header, body);
-//totalLen = strlen(header);
+    char* objID;
     
-//char* fullReq = malloc((sizeof(char))*(totalLen + 1));
+   //strcat(body, "\r\n\r\n");
+    
+	char* header = "PUT /v1/app/8b98552e5ad6425283215ea4d4339f7d/text HTTP/1.1\r\nHost: www.cloudmine.me\r\nX-CloudMine-ApiKey: 4a1bbce6b8864246a52262fe920dad52\r\nContent-Type: application/json\r\nContent-Length: ";
+    
+    int blen = strlen(body);
+    
+    char c[20];
+    sprintf(c, "%d", blen);
+    strcat(c, "\r\n\r\n");
+    
+    int tlen = strlen(header) + strlen(c) + blen + 9;
+    
+    char * content = (char*)malloc( tlen * sizeof(char) );
+    char * index = content;
+    
+    strncpy(content, header, strlen(header) );
+    index = (index + strlen(header));
+    
+    strncpy(index, c, strlen(c));
+    index = (index + strlen(c));
+    
+    strncpy(index, body, blen);
+    index = (index + blen);
+    
+    strncpy(index, "\r\n\r\n", 9);
+    
+    printf("header %s \n", content);
 
-//strcat(fullReq, header);
-//strcat(fullReq, body);
+    objID = connectDB(content, tlen);
+   // printf("header %s \n", objID);
 
-char* objID = connectDB(header, strlen(header));
-return (char*)objID;
+    return objID;
 }
 
 void deleteDBentry(char *key){

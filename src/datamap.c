@@ -105,7 +105,7 @@ int main(void)
     for ( i = 0; i < MAX_DATABASE; i++ ){
         
         dbJson[i] = parseCsv(dbFileNames[i], dbNames[i], i);
-       // printf(" THIS IS STRING: %s\n", dbJson[i]);
+        printf(" THIS IS STRING: %s\n", dbJson[i]);
     }
 		  
 	//Execute the read/eval loop
@@ -198,8 +198,8 @@ char* parseCsv(char* fileName, char * dbName, int index )
     FILE* stream = fopen(fileName, "r");
     
     root=cJSON_CreateObject();
-	cJSON_AddItemToObject(root, "name", cJSON_CreateString(dbName));
-	cJSON_AddItemToObject(root, "locations", json=cJSON_CreateArray());
+	//cJSON_AddItemToObject(root, "name", cJSON_CreateString(dbName));
+	cJSON_AddItemToObject(root, dbName, json=cJSON_CreateArray());
     
     for( i = 0; fgets(line, 1024, stream) != NULL; i++ )
     {
@@ -265,22 +265,24 @@ void requestHandler(int * dbReq, char *** ids, int numIds){
                 perror ("sigprocmask");
         }
         
-        (*ids)[2] = "2342fafsd";
+        //(*ids)[2] = "2342fafsd";
         
         for ( i = 0; i < MAX_DATABASE; i++ ){
            
             // if create and isnt already in database
             if ( dbReq[i] > 0 && (*ids)[i] == NULL ){
                 
-                //(*ids)[i] =
-                create(i);
+                (*ids)[i] = createDBentry( dbJson[i] );
+                (*ids)[i] = dbNames[i];
+                printf("This is the key %s", (*ids)[i]);
+             //   create(i);
             }
             // if delete and is still in database
-            else if ( dbReq[i] < 0 && (*ids)[i] != NULL ){
+            else if ( dbReq[i] < 0 ){//&& *(ids + i ) != NULL ){
                 
-                //deleteDBentry((*ids)[i]);
-//                (*ids)[i] = NULL;
-                delete(i);
+                deleteDBentry((*ids)[i]);
+                (*ids)[i] = NULL;
+              //  delete(i);
             
             }else{
                 printf("This is wrong\n");
