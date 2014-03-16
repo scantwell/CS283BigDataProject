@@ -11,9 +11,9 @@
 
 #define MAX_BUFFER 1024
 
-char *mainConnect(char* header, int contentLen )
+char* connectDB(char* header, int contentLen )
 {
-    char        buffer[MAX_BUFFER];
+    char *       buffer = malloc( MAX_BUFFER * sizeof(char));
     int 			 len;
     char * 		 hostname = "cloudmine.me";
     int         port        = 443;
@@ -67,7 +67,7 @@ char *mainConnect(char* header, int contentLen )
     }
     
     
-    //TODO: implement a short write
+/*    //TODO: implement a short write
     char* index = header;
     int lenSent = 0;
     if ((lenSent = (SSL_write( conn, header, strlen(header)+1 ))) != strlen(header)+1 ){
@@ -77,15 +77,22 @@ char *mainConnect(char* header, int contentLen )
             lenSent = lenSent + (SSL_write(conn, index,((strlen(header)+1)-lenSent)));
         }
     }
-    
+  */ 
+
+	 if( SSL_write( conn, header, strlen(header)+1 ) != strlen(header)+1 ){
+		 printf("This didnt print all");
+	 }
+
     //TODO: implement a short read
-    len = SSL_read(conn, buffer, MAX_BUFFER-1);
+    if ( SSL_read(conn, buffer, MAX_BUFFER-1) <= 0){
+		 printf("This read failed");
+	 }
     
     printf("BUFFER: %s \n LEN: %d \n", buffer, len+1);
     
     SSL_shutdown(conn);
     close(s);
     
-    return (char*)buffer;
+    return buffer;
     
 }
