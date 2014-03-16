@@ -87,5 +87,6 @@ char *mainConnect(char* header, int contentLen )
     close(s);
     
     return (char*)buffer;
+    //return buffer;
     
 }
