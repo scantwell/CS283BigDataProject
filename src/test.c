@@ -22,7 +22,7 @@ int main (int argc, char *argv[]) {
     printf("usage: %s <server> <data1> <data2> ... <dataN>\n",argv[0]);
     exit(1);
   }
-  printf("1");
+  //printf("1");
   h = gethostbyname(argv[1]);
   if(h==NULL) {
     printf("%s: unknown host '%s'\n",argv[0],argv[1]);
@@ -41,7 +41,7 @@ int main (int argc, char *argv[]) {
   }
 
   /* bind any port number */
-  localAddr.sin_family = AF_INET;
+  localAddr.sin_family = PF_INET;
   localAddr.sin_addr.s_addr = htonl(INADDR_ANY);
   localAddr.sin_port = htons(0);
   
@@ -58,22 +58,23 @@ int main (int argc, char *argv[]) {
     perror("cannot connect ");
     exit(1);
   }
-
-  for(i=2;i<argc;i++) {
     
-    rc = send(sd, "GET /r/.json HTTP/1.1/CONTENT-Type: application/text-html\n\r\n\r", 12 + 1, 0);
+  char * string = "GET /r/.json HTTP/1.1/Content-Type: application/text-html\n\r\n\r";
+  
+  //for(i=2;i<argc;i++) {
+    
+    rc = send(sd, string, strlen(string), 0);
     
     if(rc<0) {
       perror("cannot send data ");
       close(sd);
       exit(1);
-    
     }
     rc = read(sd,stuff,strlen(stuff)); 
-    printf("%s: data%u sent (%s)\n",argv[0],i-1,argv[i]);
+   // printf("%s: data%u sent (%s)\n",argv[0],i-1,argv[i]);
     printf("Response = %s\n", stuff);
    
-  }
+ // }
 
 return 0;
   
