@@ -17,7 +17,7 @@
 #include <sys/wait.h>
 #include <errno.h>
 #include "cJSON.h"
-//#include "DBfunctions.c"
+#include "DBfunctions.c"
 
 //Global
 #define MAX_DATABASE 5 // Max databases

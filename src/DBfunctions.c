@@ -10,23 +10,24 @@
 #include "connection.c"
 
 char *createDBentry(char *body){
+
 	char* header = "PUT /v1/app/8b98552e5ad6425283215ea4d4339f7d/text HTTP/1.1\r\nHost: www.cloudmine.me\r\nX-CloudMine-ApiKey: 4a1bbce6b8864246a52262fe920dad52\r\nContent-Type: application/json\r\nContent-Length: ";
 
-int headLen = (strlen(header)+1);
-int bodyLen = (strlen(body)+1);
-int totalLen = headLen+bodyLen;
-int tlen = strlen(body)+1;
+//int headLen = (strlen(header)+1);
+//int bodyLen = (strlen(body)+1);
+//int totalLen = headLen+bodyLen;
+//int tlen = strlen(body)+1;
 
-strcat(body, "\r\n\r\n");
-strcat(header, body);
-totalLen = strlen(header);
+strcat(header, "\r\n\r\n");
+//strcat(header, body);
+//totalLen = strlen(header);
     
-char* fullReq = malloc((sizeof(char))*(totalLen + 1));
+//char* fullReq = malloc((sizeof(char))*(totalLen + 1));
 
-strcat(fullReq, header);
+//strcat(fullReq, header);
 //strcat(fullReq, body);
 
-char* objID = mainConnect(fullReq, totalLen);
+char* objID = connectDB(header, strlen(header));
 return (char*)objID;
 }
 
@@ -41,12 +42,12 @@ void deleteDBentry(char *key){
     strcat(reqBuf, key);
     strcat(reqBuf, headerp2);
 
-    mainConnect(reqBuf, 256);
+    connectDB(reqBuf, 256);
 
     return;
 }
-
-/*char *main(char cod, char* data){
+/*
+char *main(char cod, char* data){
 	char* objID = "";
 	if(cod == 'd'){
 		deleteDBentry(data);
@@ -56,13 +57,15 @@ void deleteDBentry(char *key){
 		objID = createDBentry(data);
 		return (char*)objID;
 	}
-}*/
+}
 
-int main ( ){
+int main  (){
     
     char * db;
     
-    db = createDBEntry("{ name: 23 }" );
-    
-    return 0;
-}
+    //db = (char*)
+		 deleteDBentry("23423fsdf" );
+ 	 printf("THIS IF BUFFER %s\n", db);   
+
+	 return 0;
+}*/
