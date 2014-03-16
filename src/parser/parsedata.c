@@ -5,37 +5,87 @@
 //#include "cson_amalgamation_core.c"
 //#include "cson.c"
 
+#define WATERSHED 0
+#define CORNERSTORE 1
+#define PPRPARKS 2
+#define PPRPLAYGROUNDS 3
+#define PPRRECREATION 4
 
-void parseCsv(char* line, int cols)
+// defining a multi-arry for the index of the important columns in each db
+char *colNames[5][5] = {
+    
+    {   "name", "description",   "longitude", "latitude", "url"},
+    {   "name",     "address",     "zipcode",         "",    ""},
+    {   "name",     "address",     "zipcode",         "",    ""},
+    {"address", "description",        "name",         "",    ""},
+    {   "name",     "address",     "zipcode",      "url",    ""}
+};
+
+int colIndex[5][5] = {
+    
+    { 1, 3, 19, 20, 21},
+    { 4, 6, 7,   0,  0},
+    { 1, 3, 4,   0,  0},
+    { 1, 2, 3,   0,  0},
+    { 1, 3, 4,   5,  0}
+};
+
+// Takes name of file, name of database, database macro
+void parseCsv(char* fileName, char * dbName, int index )
 {
     const char* toks;
-    char** object;
-    int objSize = 5;
+//    char** object;
+//   int objSize = 5;
     int i;
+    int j;
     int k = 0;
     cJSON *json, *root, *fmt;
-    char * out;
+    char line[1024];;
+    
+    FILE* stream = fopen(fileName, "r");
     
     root=cJSON_CreateObject();
-	cJSON_AddItemToObject(root, "name", cJSON_CreateString("DBname"));
+	cJSON_AddItemToObject(root, "name", cJSON_CreateString(dbName));
 	cJSON_AddItemToObject(root, "locations", json=cJSON_CreateArray());
-    
-   
-    toks = strtok(line, "\\n,");
-    
-    for( i = 0; toks !=NULL ; toks = strtok(NULL, "\\n,"), i++){
+
+    for( i = 0; fgets(line, 1024, stream) != NULL; i++ )
+    {
         
-    cJSON_AddItemToObject(json, "location", fmt=cJSON_CreateObject());
-	cJSON_AddStringToObject(fmt,"type",		"rect");
-	cJSON_AddNumberToObject(fmt,"width",		1920);
-	cJSON_AddNumberToObject(fmt,"height",		1080);
-	cJSON_AddFalseToObject (fmt,"interlace");
-	cJSON_AddNumberToObject(fmt,"frame rate",	24);
-    
-        printf("This is tok: %s \n", cJSON_Print(root) );
-        //if (!--num)
-          //  return tok;
+        if ( i != 0 ){
+            
+            cJSON_AddItemToObject(json, "location", fmt=cJSON_CreateObject());
+
+            toks = strtok(line, "\n,");
+            
+            k = 0;
+            
+            for( j = 0; toks !=NULL ; toks = strtok(NULL, "\n,\r"), j++){
+        
+                //printf("This is the val: %d ----- %s \n", j, toks);
+
+                if ( j == colIndex[index][k] && j != 0){
+                    
+                    //printf("This is the val: %d\n", j);//colNames[index][k]);
+                    //printf("This is the val: %s         %s\n", colNames[index][k], toks);
+                    cJSON_AddStringToObject(fmt, colNames[index][k], toks);
+                    k++;
+                }
+            }
+        /*
+         cJSON_AddItemToObject(json, "location", fmt=cJSON_CreateObject());
+         cJSON_AddStringToObject(fmt,"type",		"rect");
+         cJSON_AddNumberToObject(fmt,"width",		1920);
+         cJSON_AddNumberToObject(fmt,"height",		1080);
+         cJSON_AddFalseToObject (fmt,"interlace");
+         cJSON_AddNumberToObject(fmt,"frame rate",	24);
+         */
+
+        }
     }
+    
+    printf("This is tok: %s \n", cJSON_Print(root) );
+    
+    fclose(stream);
     
     return;
 }
@@ -46,35 +96,21 @@ void createJsonObject(char** items){
 
 int main(int argc, char *argv[])
 {
-//    cson_value * objV = cson_value_new_object();
- //   cson_object * obj = cson_value_get_object(objV);
-  //  cson_value * arV = cson_value_new_array();
-   // cson_object_set( obj, "storeArray", arV );
-	// Add some values to it:
-    //cson_object_set( obj, "myInt", cson_value_new_integer(42) );
-    //cson_object_set( obj, "myDouble", cson_value_new_double(42.24) );
-    //cson_output_FILE( objV, stdout, NULL );
-//    cson_array * ar = cson_value_get_array(arV);
-    //cson_array_set( ar, i, cson_new_value_string("Hi, world!", 10) );
-
-    FILE* stream = fopen(argv[1], "r");
-    int i = 0;
-    char line[1024];
-    while (fgets(line, 1024, stream))
-    {
-	const char* name;
-        char* tmp = strdup(line);
-	char* tmp2 = strdup(line);
-	char* tmp3 = strdup(line);
-	parseCsv(tmp,5);
-//	cson_array_set( ar, i, cson_new_value_string(name,strlen(name )));
-	//printf("name would be %s\n", getfield(tmp, 5));
-	//printf("addr would be %s\n", getfield(tmp2, 6));
-	//printf("zip would be %s\n", getfield(tmp3, 7));
-        free(tmp);
-    }
-  //  cson_output_FILE( objV, stdout, NULL);
-    fclose(stream);
-
+    int i;
     
+    char * dbNames[5] = { "Philadelphia_Green_Storm_Water_Infrastructure201302.csv",
+                        "Philadelphia_Healthy_Corner_Stores201302.csv",
+                        "Philadelphia_PPR_Parks_Points201302.csv",
+                        "Philadelphia_PPR_Playgrounds201302.csv",
+                        "Philadelphia_PPR_Recreation_Facilities201302.csv"
+    };
+    
+    
+    printf( " THIS IS ARGC %d", argc );
+    for ( i = 0; i < 5; i++ ){
+	
+        parseCsv(dbNames[i], dbNames[i], 0);
+    
+    }
+    return 0;
 }
