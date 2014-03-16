@@ -15,12 +15,13 @@ char *createDBentry(char *body){
 int headLen = (strlen(header)+1);
 int bodyLen = (strlen(body)+1);
 int totalLen = headLen+bodyLen;
-char fullReq[10000] = "";
+char* fullReq = malloc((sizeof char)*(totalLen + 1));
 
 strcat(fullReq, header);
 strcat(fullReq, body);
 
 char* objID = mainConnect(fullReq, totalLen);
+return (char*)objID;
 }
 
 deleteDBentry(char *key){
