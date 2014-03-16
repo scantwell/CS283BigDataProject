@@ -58,12 +58,15 @@ int colIndex[5][5] = {
 // Names of the databases that we are using
 char *dbNames[] = {"Clean-Watershed", "Health Corner Stores", "PPR Playgrounds", "PPR Parks", "PPR Recreation Facilities"};
 
+void create(int index);
 char ** dbJson;
+void delete(int index);
 void displayMenu();
 char * parseCsv(char* fileName, char * dbName, int index );
 void sig_handler(int sig);
 void sigchld_handler(int sig);
 void requestHandler(int * dbReq, char*** req, int numIds);
+
 void stub(char*, int);
 
 
@@ -79,7 +82,7 @@ int main(void)
     int i; // iterator
     
     int dbRequest[MAX_DATABASE]; // Stores the users request for the databases to be displayed
-    char** objectIDs[MAX_DATABASE]; // Stores the current Object IDs that are submited in DB, for deletion
+    char** objectIDs = malloc(MAX_DATABASE * sizeof(char*)); // Stores the current Object IDs that are submited in DB, for deletion
 
     signal(SIGINT,  sig_handler);   /* ctrl-c */
     signal(SIGTSTP, sig_handler); /* ctrl-z */
@@ -101,7 +104,7 @@ int main(void)
     for ( i = 0; i < MAX_DATABASE; i++ ){
         
         dbJson[i] = parseCsv(dbFileNames[i], dbNames[i], i);
-        printf(" THIS IS STRING: %s\n", dbJson[i]);
+       // printf(" THIS IS STRING: %s\n", dbJson[i]);
     }
 		  
 	//Execute the read/eval loop
@@ -117,7 +120,7 @@ int main(void)
             
            // printf("this is view");
             //Call the function that will spawn the process for threading
-            requestHandler(dbRequest, (char***)&objectIDs, MAX_DATABASE);
+            requestHandler(dbRequest, &objectIDs, MAX_DATABASE);
             
         }else{ // convert the string to an integer and carry on
             user_input = atoi(raw_input);
@@ -237,13 +240,65 @@ void stub(char * user_choice, int add_rem) {
 	printf("from %s\n", user_choice);
     
 }
+
 void requestHandler(int * dbReq, char *** ids, int numIds){
     
-  //  pid_t = pid;
+    int i;
+    pid_t pid;
     
-    //if ( (pid = fork()) == 0 ){
+    sigset_t mask;
+    
+	sigemptyset (&mask);
+    sigaddset (&mask, SIGINT);
+    sigaddset (&mask, SIGTSTP);
+    
+    if (sigprocmask(SIG_BLOCK, &mask, NULL) < 0) {
+        perror ("sigprocmask");
+    }
+    
+    if ( (pid = fork()) == 0 ){
         // read the request
-    //}
+        setpgid(0,0);
+        
+        if (sigprocmask(SIG_UNBLOCK, &mask, NULL) < 0) {
+                perror ("sigprocmask");
+        }
+        
+        (*ids)[2] = "2342fafsd";
+        
+        for ( i = 0; i < MAX_DATABASE; i++ ){
+           
+            // if create and isnt already in database
+            if ( dbReq[i] > 0 && (*ids)[i] == NULL ){
+                
+                create(i);
+            }
+            // if delete and is still in database
+            else if ( dbReq[i] < 0 && (*ids)[i] != NULL ){
+                
+                delete(i);
+            
+            }else{
+                printf("This is wrong\n");
+            }
+        }
+        
+        //sleep(10);
+    
+        displayMenu(dbReq);
+        
+        exit(0);
+    }
+    
+    return;
+}
+
+void create(int index){
+    printf( " YOU HAVE CREATED %s\n", dbNames[index] );
+    return;
+}
+void delete(int index){
+    printf( " YOU HAVE Deleted %s\n", dbNames[index] );
     return;
 }
 
@@ -271,4 +326,36 @@ void sigchld_handler(int sig){
     
     printf("One of your children has closed, time to reap");
     
+    pid_t pid;
+    int status;
+    struct job_t *job;
+    
+    if( sig == SIGCHLD){
+        
+        while( (pid = waitpid(-1, &status, WUNTRACED | WNOHANG)) > 0){
+            
+            kill(-pid, SIGKILL);
+            
+            /*if (WIFEXITED(status)){
+                //  printf("THIS IS PID: %d\n", pid);
+                //               printf("THIS IS HERE");
+                //if (deletejob(jobs, pid) == 0 )
+                    //printf("Child Hanlder: could not find job to delete");
+                kill(-pid, SIGKILL);
+            } else if( WIFSTOPPED(status)) {
+               // if ( (job = getjobpid(jobs, pid)) == NULL)
+                printf("Child Hanlder: Failed to find job");
+                // printf("HAS BEEN STOPPED HERE");
+                //job->state = ST;
+            } else if (WIFCONTINUED(status)){
+                //if ( (job = getjobpid(jobs, pid)) == NULL)
+                    printf("Child Hanlder: Failed to find job");
+                  //  job->state = BG;
+                kill(pid, SIGCONT);
+            }*/
+        }
+    }
+    
+    return;
 }
+
