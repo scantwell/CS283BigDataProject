@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <netdb.h>
 #include <openssl/ssl.h>
+
 int main()
 {
     SSL_load_error_strings ();
@@ -45,19 +46,22 @@ int main()
     }
       
     memcpy((void *)&serv_addr.sin_addr, hp->h_addr_list[0], hp->h_length);
-    SSL *conn = SSL_new(ssl_ctx);
+    
+	 SSL *conn = SSL_new(ssl_ctx);
     SSL_set_fd(conn, s);
-    if ( connect(s, (struct sockaddr *)&serv_addr, sizeof(serv_addr) )){
+    
+	 if ( connect(s, (struct sockaddr *)&serv_addr, sizeof(serv_addr) )){
         perror("connect failed");
         return 0;
     }
     char *header ="GET /v1/app/8b98552e5ad6425283215ea4d4339f7d/text? HTTP/1.1 \r\nHost:cloudmine.me \r\nX-CloudMine-ApiKey: 4a1bbce6b8864246a52262fe920dad52\r\n\r\n"; 
-    if ( (SSL_write( s,header, strlen(header)+1, 0 )) != 22 ){
+  
+  	 if ( (SSL_write( conn, header, strlen(header)+1 )) != strlen(header)+1 ){
         printf("Did not send everything");
     }
     char buffer[1024];
     int len = 1023;
-    len = SSL_read(s, buffer, len);
+    len = SSL_read(conn, buffer, len);
     printf("%s\n", buffer);
     
    // close(s);
