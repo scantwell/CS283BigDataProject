@@ -49,7 +49,15 @@ int main()
         return 0;
     }
     
-    close(s);
+    if ( (send( s, "GET / HTTP/1.1\r\n\r\n", 22, 0 )) != 22 ){
+        printf("Did not send everything");
+    }
+    char buffer[1024];
+    int len = 1023;
+    len = read(s, buffer, len);
+    printf("THIS IS BUFF %s\n", buffer);
+    
+   // close(s);
     
     return 0;
 
