@@ -17,7 +17,7 @@
 #include <sys/wait.h>
 #include <errno.h>
 #include "cJSON.h"
-#include "DBfunctions.c"
+//#include "DBfunctions.c"
 
 //Global
 #define MAX_DATABASE 5 // Max databases
@@ -272,13 +272,15 @@ void requestHandler(int * dbReq, char *** ids, int numIds){
             // if create and isnt already in database
             if ( dbReq[i] > 0 && (*ids)[i] == NULL ){
                 
-                (*ids)[i] = createDBentry(dbJson[i]);
+                //(*ids)[i] =
+                create(i);
             }
             // if delete and is still in database
             else if ( dbReq[i] < 0 && (*ids)[i] != NULL ){
                 
-                deleteDBentry((*ids)[i]);
-                (*ids)[i] = NULL;
+                //deleteDBentry((*ids)[i]);
+//                (*ids)[i] = NULL;
+                delete(i);
             
             }else{
                 printf("This is wrong\n");

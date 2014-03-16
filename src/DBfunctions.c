@@ -15,16 +15,16 @@ char *createDBentry(char *body){
 int headLen = (strlen(header)+1);
 int bodyLen = (strlen(body)+1);
 int totalLen = headLen+bodyLen;
-int tlen = strlen(body)+1);
+int tlen = strlen(body)+1;
 
 strcat(body, "\r\n\r\n");
 strcat(header, body);
 totalLen = strlen(header);
     
-char* fullReq = malloc((sizeof char)*(totalLen + 1));
+char* fullReq = malloc((sizeof(char))*(totalLen + 1));
 
 strcat(fullReq, header);
-strcat(fullReq, body);
+//strcat(fullReq, body);
 
 char* objID = mainConnect(fullReq, totalLen);
 return (char*)objID;
@@ -46,7 +46,7 @@ void deleteDBentry(char *key){
     return;
 }
 
-char *main(char cod, char* data){
+/*char *main(char cod, char* data){
 	char* objID = "";
 	if(cod == 'd'){
 		deleteDBentry(data);
@@ -56,4 +56,13 @@ char *main(char cod, char* data){
 		objID = createDBentry(data);
 		return (char*)objID;
 	}
+}*/
+
+int main ( ){
+    
+    char * db;
+    
+    db = createDBEntry("{ name: 23 }" );
+    
+    return 0;
 }
