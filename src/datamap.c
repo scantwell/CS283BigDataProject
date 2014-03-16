@@ -16,12 +16,51 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <errno.h>
+#include "cJSON.h"
 
 //Global
 #define MAX_DATABASE 5 // Max databases
+
+// Defining the index for the parallel arrays colNames, colIndex
+#define WATERSHED 0
+#define CORNERSTORE 1
+#define PPRPARKS 2
+#define PPRPLAYGROUNDS 3
+#define PPRRECREATION 4
+
+// Filenames of the databases
+char * dbFileNames[5] = {
+    "./db/Philadelphia_Green_Storm_Water_Infrastructure201302.csv",
+    "./db/Philadelphia_Healthy_Corner_Stores201302.csv",
+    "./db/Philadelphia_PPR_Parks_Points201302.csv",
+    "./db/Philadelphia_PPR_Playgrounds201302.csv",
+    "./db/Philadelphia_PPR_Recreation_Facilities201302.csv"
+};
+
+// defining a multi-arry for the index of the important columns in each db
+char *colNames[5][5] = {
+    
+    {   "name", "description",   "longitude", "latitude", "url"},
+    {   "name",     "address",     "zipcode",         "",    ""},
+    {   "name",     "address",     "zipcode",         "",    ""},
+    {"address", "description",        "name",         "",    ""},
+    {   "name",     "address",     "zipcode",      "url",    ""}
+};
+// defines multi-array for the index of the important columns in the database
+int colIndex[5][5] = {
+    
+    { 1, 3, 19, 20, 21},
+    { 4, 6, 7,   0,  0},
+    { 1, 3, 4,   0,  0},
+    { 1, 2, 3,   0,  0},
+    { 1, 3, 4,   5,  0}
+};
+// Names of the databases that we are using
 char *dbNames[] = {"Clean-Watershed", "Health Corner Stores", "PPR Playgrounds", "PPR Parks", "PPR Recreation Facilities"};
 
+char ** dbJson;
 void displayMenu();
+char * parseCsv(char* fileName, char * dbName, int index );
 void sig_handler(int sig);
 void sigchld_handler(int sig);
 void requestHandler(int * dbReq, char*** req, int numIds);
@@ -53,6 +92,16 @@ int main(void)
         dbRequest[i] = 0;
         objectIDs[i] = NULL;
        // printf("dbReq %d", dbRequest[i]);
+    }
+    
+    //dbJson holds all json strings
+    dbJson = malloc( MAX_DATABASE * sizeof(char*));
+    
+    //parses csv data files into Json and returns to dbJson
+    for ( i = 0; i < MAX_DATABASE; i++ ){
+        
+        dbJson[i] = parseCsv(dbFileNames[i], dbNames[i], i);
+        printf(" THIS IS STRING: %s\n", dbJson[i]);
     }
 		  
 	//Execute the read/eval loop
@@ -130,6 +179,54 @@ void displayMenu(int * dbReq){
         printf("Once you have made your desired selections enter 'view'\n");
         printf("To exit, type 0 (zero) to quit the application.\n");
 }
+
+// Takes name of file, name of database, database macro
+char* parseCsv(char* fileName, char * dbName, int index )
+{
+    const char* toks;
+    int i; //iterator
+    int j; //iterator
+    int k; //iterator for parallel
+    char* res; // response string of Json
+    char line[1024]; // Buffer to hold each line of file
+    cJSON *json, *root, *fmt; //cJson library elements
+    
+    FILE* stream = fopen(fileName, "r");
+    
+    root=cJSON_CreateObject();
+	cJSON_AddItemToObject(root, "name", cJSON_CreateString(dbName));
+	cJSON_AddItemToObject(root, "locations", json=cJSON_CreateArray());
+    
+    for( i = 0; fgets(line, 1024, stream) != NULL; i++ )
+    {
+        
+        if ( i != 0 ){
+            
+            cJSON_AddItemToObject(json, "location", fmt=cJSON_CreateObject());
+            
+            toks = strtok(line, "\n,");
+            
+            k = 0;
+            
+            for( j = 0; toks !=NULL ; toks = strtok(NULL, "\n,\r"), j++){
+                
+                if ( j == colIndex[index][k] && j != 0){
+                    cJSON_AddStringToObject(fmt, colNames[index][k], toks);
+                    k++;
+                }
+            }
+        }
+    }
+    
+    res = cJSON_Print(root);
+    
+    cJSON_Delete(root);
+    
+    fclose(stream);
+    
+    return res;
+}
+
 
 void stub(char * user_choice, int add_rem) {
     
