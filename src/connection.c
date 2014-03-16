@@ -11,7 +11,7 @@
 
 #define MAX_BUFFER 1024
 
-int main()
+char *mainConnect(char* header, int contentLen )
 {
     char        buffer[MAX_BUFFER];
     int 	len;
@@ -67,11 +67,24 @@ int main()
 	 printf("connection error");
     }
 
+<<<<<<< HEAD
     char *header ="GET /v1/app/8b98552e5ad6425283215ea4d4339f7d/text HTTP/1.1\r\nHost: www.cloudmine.me\r\nX-CloudMine-ApiKey: 4a1bbce6b8864246a52262fe920dad52\r\n\r\n"; 
 
     //TODO: implement a short write
    if ( (SSL_write( conn, header, strlen(header)+1 )) != strlen(header)+1 ){
         printf("Did not send everything");
+=======
+    
+	 //TODO: implement a short write
+  	 char* index = header;
+	 int lenSent = 0;
+	 if ((lenSent = (SSL_write( conn, header, strlen(header)+1 ))) != strlen(header)+1 ){
+		 printf("Did not send everything -- Retrying Now");
+		 while(lenSent != strlen(header)+1){
+        		 index = index+lenSent;
+        		 lenSent = lenSent + (SSL_write(conn, index,((strlen(header)+1)-lenSent)));
+        }
+>>>>>>> ec4bb1cd9d312ffc96cb118677a99b8e0544e084
     }
 
     //TODO: implement a short read
@@ -79,9 +92,13 @@ int main()
     
     printf("BUFFER: %s \n LEN: %d \n", buffer, len+1);
     
+<<<<<<< HEAD
     SSL_shutdown(conn);
     close(s);
 
     return 0;
+=======
+    return (char*)buffer;
+>>>>>>> ec4bb1cd9d312ffc96cb118677a99b8e0544e084
 
 }
