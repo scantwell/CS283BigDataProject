@@ -9,8 +9,8 @@
 int main()
 {
 
-    char * hostname = "www.reddit.com";
-    int         port        = 80;
+    char * hostname = "www.cloudmine.me";
+    int         port        =  443;
     int         s,rc;
     //struct sockaddr_in name;
     struct sockaddr_in serv_addr, cli_addr;
@@ -49,7 +49,9 @@ int main()
         return 0;
     }
     
-    if ( (send( s, "GET / HTTP/1.1\r\n\r\n", 22, 0 )) != 22 ){
+    char * string = "GET /v1/app/8b98552e5ad6425283215ea4d4339f7d/text HTTP/1.1\r\nHost: www.cloudmine.me\r\nX-CloudMine-ApiKey: 4a1bbce6b8864246a52262fe920dad52\r\n\r\n";
+    
+    if ( (send( s, string, strlen(string) + 1, 0 )) != strlen(string) ){
         printf("Did not send everything");
     }
     char buffer[1024];
