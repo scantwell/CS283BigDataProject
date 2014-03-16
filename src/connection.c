@@ -68,8 +68,14 @@ char *mainConnect(char* header, int contentLen )
 
     
 	 //TODO: implement a short write
-  	 if ( (SSL_write( conn, header, strlen(header)+1 )) != strlen(header)+1 ){
-        printf("Did not send everything");
+  	 char* index = header;
+	 int lenSent = 0;
+	 if ((lenSent = (SSL_write( conn, header, strlen(header)+1 ))) != strlen(header)+1 ){
+		 printf("Did not send everything -- Retrying Now");
+		 while(lenSent != strlen(header)+1){
+        		 index = index+lenSent;
+        		 lenSent = lenSent + (SSL_write(conn, index,((strlen(header)+1)-lenSent)));
+        }
     }
 
 	 //TODO: implement a short read
