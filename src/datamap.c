@@ -16,6 +16,7 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <errno.h>
+#include <omp.h>
 #include "cJSON.h"
 #include "DBfunctions.c"
 
@@ -29,6 +30,7 @@
 #define PPRPLAYGROUNDS 3
 #define PPRRECREATION 4
 
+#define num_threads 4
 // Filenames of the databases
 char * dbFileNames[5] = {
     "./db/Philadelphia_Green_Storm_Water_Infrastructure201302.csv",
@@ -83,6 +85,8 @@ int main(void)
     
     int dbRequest[MAX_DATABASE]; // Stores the users request for the databases to be displayed
     char** objectIDs = malloc(MAX_DATABASE * sizeof(char*)); // Stores the current Object IDs that are submited in DB, for deletion
+    
+    void omp_set_num_threads(num_threads); 
 
     signal(SIGINT,  sig_handler);   /* ctrl-c */
     signal(SIGTSTP, sig_handler); /* ctrl-z */
@@ -268,6 +272,7 @@ void requestHandler(int * dbReq, char *** ids, int numIds){
         }
         
         //PRAGMA
+	#pragma omp parallel for
         for ( i = 0; i < MAX_DATABASE; i++ ){
            
             // if create and isnt already in database
@@ -307,6 +312,7 @@ void clearDB(){
     int i;
     
     //prgama
+    #pragma omp parallel for
     for ( i = 0; i < MAX_DATABASE; i++){
         deleteDBentry(dbNames[i]);
     }
