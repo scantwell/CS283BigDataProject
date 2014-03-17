@@ -41,11 +41,11 @@ char * dbFileNames[5] = {
 // defining a multi-arry for the index of the important columns in each db
 char *colNames[5][5] = {
     
-    {   "name", "description",   "longitude", "latitude", "url"},
-    {   "name",     "address",     "zipcode",         "",    ""},
-    {   "name",     "address",     "zipcode",         "",    ""},
-    {"address", "description",        "name",         "",    ""},
-    {   "name",     "address",     "zipcode",      "url",    ""}
+    {   "name", "description",         "url","longitude",    "latitude"},
+    {   "name",     "address",     "zipcode", "latitude",    "longitude"},
+    {   "name",     "address",     "zipcode", "latitude",    "longitude"},
+    {"address", "description",        "name", "latitude",    "longitude"},
+    {   "name",     "address", "description", "latitude",    "longitude"}
 };
 // defines multi-array for the index of the important columns in the database
 int colIndex[5][5] = {
@@ -53,8 +53,8 @@ int colIndex[5][5] = {
     { 1, 3, 19, 20, 21},
     { 4, 6, 7,   0,  0},
     { 1, 3, 4,   0,  0},
-    { 1, 2, 3,   0,  0},
-    { 1, 3, 4,   5,  0}
+    { 1, 2, 3,   4,  5},
+    { 1, 3, 5,   6,  7}
 };
 // Names of the databases that we are using
 char *dbNames[] = {"Clean-Watershed", "Health-Corner-Stores", "PPR-Playgrounds", "PPR-Parks", "PPR-Recreation-Facilities"};
@@ -289,6 +289,7 @@ void requestHandler(int * dbReq, char *** ids, int numIds){
         }
         
         //SYSTEM COMMAND
+        system("open http://www2.cs.drexel.edu/~sc3356/googMap/special/");
         
         exit(0);
         
