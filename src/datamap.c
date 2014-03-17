@@ -57,11 +57,10 @@ int colIndex[5][5] = {
     { 1, 3, 4,   5,  0}
 };
 // Names of the databases that we are using
-char *dbNames[] = {"Clean-Watershed", "Health Corner Stores", "PPR Playgrounds", "PPR Parks", "PPR Recreation Facilities"};
+char *dbNames[] = {"Clean-Watershed", "Health-Corner-Stores", "PPR-Playgrounds", "PPR-Parks", "PPR-Recreation-Facilities"};
 
-void create(int index);
+void clearDB();
 char ** dbJson;
-void delete(int index);
 void displayMenu();
 char * parseCsv(char* fileName, char * dbName, int index );
 void sig_handler(int sig);
@@ -105,7 +104,7 @@ int main(void)
     for ( i = 0; i < MAX_DATABASE; i++ ){
         
         dbJson[i] = parseCsv(dbFileNames[i], dbNames[i], i);
-        printf(" THIS IS STRING: %s\n", dbJson[i]);
+        //printf(" THIS IS STRING: %s\n", dbJson[i]);
     }
 		  
 	//Execute the read/eval loop
@@ -154,6 +153,9 @@ int main(void)
             }// switch
         }
 	}//while
+    
+    clearDB();
+    
 	return 0;
 }// main
 
@@ -265,8 +267,7 @@ void requestHandler(int * dbReq, char *** ids, int numIds){
                 perror ("sigprocmask");
         }
         
-        //(*ids)[2] = "2342fafsd";
-        
+        //PRAGMA
         for ( i = 0; i < MAX_DATABASE; i++ ){
            
             // if create and isnt already in database
@@ -274,38 +275,42 @@ void requestHandler(int * dbReq, char *** ids, int numIds){
                 
                 (*ids)[i] = createDBentry( dbJson[i] );
                 (*ids)[i] = dbNames[i];
-                printf("This is the key %s", (*ids)[i]);
+               // printf("This is the key %s", (*ids)[i]);
              //   create(i);
             }
             // if delete and is still in database
-            else if ( dbReq[i] < 0 ){//&& *(ids + i ) != NULL ){
-                
-                deleteDBentry((*ids)[i]);
+            else if ( dbReq[i] < 0 ){//&& (*ids)[i] != NULL ){
+                // printf("This DELETE\n");
+               // printf("This is the key %s", dbNames[i]);
+                deleteDBentry( dbNames[i] );
                 (*ids)[i] = NULL;
               //  delete(i);
-            
-            }else{
-                printf("This is wrong\n");
             }
         }
         
-        //sleep(10);
-    
-        displayMenu(dbReq);
+        //SYSTEM COMMAND
         
         exit(0);
+        
+    }// end of fork
+    
+    if (sigprocmask(SIG_UNBLOCK, &mask, NULL) < 0) {
+        perror ("sigprocmask");
     }
+    
+    displayMenu(dbReq);
     
     return;
 }
 
-void create(int index){
-    printf( " YOU HAVE CREATED %s\n", dbNames[index] );
-    return;
-}
-void delete(int index){
-    printf( " YOU HAVE Deleted %s\n", dbNames[index] );
-    return;
+void clearDB(){
+    int i;
+    
+    //prgama
+    for ( i = 0; i < MAX_DATABASE; i++){
+        deleteDBentry(dbNames[i]);
+    }
+    
 }
 
 /*
@@ -316,21 +321,15 @@ void delete(int index){
  */
 
 void sig_handler(int sig){
-    int i;
-    int dbReq[MAX_DATABASE];
     
-    printf("CLEAR ALL OF THE DATABASES\n");
-    for ( i = 0; i < MAX_DATABASE; i++ ){
-        dbReq[i] = 0;
-    }
-    requestHandler(dbReq, NULL, MAX_DATABASE);
+    clearDB();
     
     exit(0);
 }
 
 void sigchld_handler(int sig){
     
-    printf("One of your children has closed, time to reap");
+    //printf("One of your children has closed, time to reap");
     
     pid_t pid;
     int status;

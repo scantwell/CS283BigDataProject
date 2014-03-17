@@ -39,7 +39,7 @@ char *createDBentry(char *body){
     
     strncpy(index, "\r\n\r\n", 9);
     
-    printf("header %s \n", content);
+   // printf("header %s \n", content);
 
     objID = connectDB(content, tlen);
    // printf("header %s \n", objID);

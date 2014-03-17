@@ -78,7 +78,7 @@ char* connectDB(char* header, int contentLen )
         }
     }
  *///header = "PUT /v1/app/8b98552e5ad6425283215ea4d4339f7d/text HTTP/1.1\r\nHost: www.cloudmine.me\r\nX-CloudMine-ApiKey: 4a1bbce6b8864246a52262fe920dad52\r\nContent-Type: application/json\r\nContent-Length: 90\r\n\r\n{\"this\":{\"name\": \"Data1\",\"latitude\": \"39\",\"longitude\": \"-74.74\",\"info\": \"this is data1\"}}\r\n\r\n";
-    printf("HEADER IN CONN %s\n", header);
+    //printf("HEADER IN CONN %s\n", header);
 	 if( SSL_write( conn, header, strlen(header)+1 ) != strlen(header)+1 ){
 		 printf("This didnt print all");
 	 }
@@ -88,7 +88,7 @@ char* connectDB(char* header, int contentLen )
 		 printf("This read failed");
 	 }
     
-    printf("BUFFER: %s \n LEN: %d \n", buffer, len+1);
+    //printf("BUFFER: %s \n LEN: %d \n", buffer, len+1);
     
     SSL_shutdown(conn);
     close(s);
