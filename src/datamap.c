@@ -16,7 +16,7 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <errno.h>
-#include <omp.h>
+//#include <omp.h>
 #include "cJSON.h"
 #include "DBfunctions.c"
 
@@ -59,15 +59,15 @@ int colIndex[5][5] = {
     { 1, 3, 5,   6,  7}
 };
 // Names of the databases that we are using
-char *dbNames[] = {"Clean-Watershed", "Health-Corner-Stores", "PPR-Playgrounds", "PPR-Parks", "PPR-Recreation-Facilities"};
+char *dbNames[] = {"Clean-Watershed", "Health-Corner-Stores", "PPR-Playgrounds", "PPR-Parks", "PPR-Recreation-Facilities"}; 
 
-void clearDB();
-char ** dbJson;
-void displayMenu();
-char * parseCsv(char* fileName, char * dbName, int index );
-void sig_handler(int sig);
-void sigchld_handler(int sig);
-void requestHandler(int * dbReq, char*** req, int numIds);
+void clearDB(); // used to clear all DB
+char ** dbJson; // stores the json strings for each file
+void displayMenu(); // displays a menu to the user
+char * parseCsv(char* fileName, char * dbName, int index ); // parses csv files into json
+void sig_handler(int sig); // handles int, stp,quit to clear dbs and then quit
+void sigchld_handler(int sig); // handles reaping the child
+void requestHandler(int * dbReq, char*** req, int numIds); // handles forking child and to load the json string to the database
 
 void stub(char*, int);
 
@@ -131,7 +131,7 @@ int main(void)
         
             //Decrement the user input because
             index = abs(user_input) - 1 ;
-        
+            // Adjust the dbReq array
             switch (abs(user_input)) {
                 case 0:
                     break;
@@ -162,7 +162,9 @@ int main(void)
     
 	return 0;
 }// main
-
+// Displays the menu for the user
+// lists the databases that are supported
+// displays with of them are already loaded into the DB
 void displayMenu(int * dbReq){
     
     int i; //iterator
@@ -174,7 +176,7 @@ void displayMenu(int * dbReq){
     printf("You add or remove data from the map by entering +/- a number.\n");
     printf("The number represents one of the databases in the application.\n");
     printf("Presently, the following databsaes are available:\n\n");
-    
+    // iterate over the database names in the dbNames file
     for ( i = 1; i <= MAX_DATABASE; i++ ){
         // Determines if the user has already selected this database
         int index = i - 1;
@@ -191,9 +193,13 @@ void displayMenu(int * dbReq){
 }
 
 // Takes name of file, name of database, database macro
+// Reads from a file, and iterates over the csv file taking the
+// desired fields which are located in the colIndex global array
+// and parses those into Json objects adding to 1 json file per
+// file and returns that object
 char* parseCsv(char* fileName, char * dbName, int index )
 {
-    const char* toks;
+    const char* toks; // used to iterate over each item in line
     int i; //iterator
     int j; //iterator
     int k; //iterator for parallel
@@ -201,43 +207,49 @@ char* parseCsv(char* fileName, char * dbName, int index )
     char line[1024]; // Buffer to hold each line of file
     cJSON *json, *root, *fmt; //cJson library elements
     
+    //opening file
     FILE* stream = fopen(fileName, "r");
     
+    // create the root object for cJSON
     root=cJSON_CreateObject();
-	//cJSON_AddItemToObject(root, "name", cJSON_CreateString(dbName));
+	//Create the first object is an array
 	cJSON_AddItemToObject(root, dbName, json=cJSON_CreateArray());
-    
+   
+    //iterates over each line in the file
     for( i = 0; fgets(line, 1024, stream) != NULL; i++ )
     {
-        
+        // if its not the header file
         if ( i != 0 ){
-            
+            //adding the first object
             cJSON_AddItemToObject(json, "location", fmt=cJSON_CreateObject());
-            
+            //toks the line removing newline and seeding strtok
             toks = strtok(line, "\n,");
             
             k = 0;
-            
+            // iterates over each item in the line of the csv
             for( j = 0; toks !=NULL ; toks = strtok(NULL, "\n,\r"), j++){
-                
+                // if its an important col
                 if ( j == colIndex[index][k] && j != 0){
+                    //add that col to the object
                     cJSON_AddStringToObject(fmt, colNames[index][k], toks);
+                    //increment the index for the colNames
                     k++;
                 }
             }
         }
     }
-    
+    // assign res the Json String
     res = cJSON_Print(root);
-    
+    // cleaning up the root
     cJSON_Delete(root);
-    
+    // closing the stream
     fclose(stream);
     
     return res;
 }
 
-
+// For the glory
+// NOT USED IN PROGRAM
 void stub(char * user_choice, int add_rem) {
     
 	if(add_rem == 1)
@@ -248,25 +260,28 @@ void stub(char * user_choice, int add_rem) {
     
 }
 
+// Handles the user request for the DB that will be displayed on the website
+// params: dbReq which is an array of the databases needed
 void requestHandler(int * dbReq, char *** ids, int numIds){
     
     int i;
-    pid_t pid;
+    pid_t pid; // pid of child process
     
     sigset_t mask;
     
-	sigemptyset (&mask);
-    sigaddset (&mask, SIGINT);
-    sigaddset (&mask, SIGTSTP);
+	sigemptyset (&mask); // creates empty mask
+    sigaddset (&mask, SIGINT); // pushes signal set on mask
+    sigaddset (&mask, SIGTSTP); // pushes signal set on mask
     
+    // Blocks all signal handling
     if (sigprocmask(SIG_BLOCK, &mask, NULL) < 0) {
         perror ("sigprocmask");
     }
     
     if ( (pid = fork()) == 0 ){
-        // read the request
+        //sets the group id of the child process to its pid
         setpgid(0,0);
-        
+        // unblock sigs
         if (sigprocmask(SIG_UNBLOCK, &mask, NULL) < 0) {
                 perror ("sigprocmask");
         }
@@ -281,34 +296,33 @@ void requestHandler(int * dbReq, char *** ids, int numIds){
                 (*ids)[i] = createDBentry( dbJson[i] );
                 (*ids)[i] = dbNames[i];
                // printf("This is the key %s", (*ids)[i]);
-             //   create(i);
             }
             // if delete and is still in database
             else if ( dbReq[i] < 0 ){//&& (*ids)[i] != NULL ){
-                // printf("This DELETE\n");
                // printf("This is the key %s", dbNames[i]);
                 deleteDBentry( dbNames[i] );
                 (*ids)[i] = NULL;
-              //  delete(i);
             }
         }
         
-        //SYSTEM COMMAND
+        //SYSTEM COMMAND opens a browser on the system
         system("open http://www2.cs.drexel.edu/~sc3356/googMap/special/");
         
         exit(0);
         
     }// end of fork
     
+    // unblocks the signals returns to original state
     if (sigprocmask(SIG_UNBLOCK, &mask, NULL) < 0) {
         perror ("sigprocmask");
     }
     
+    // Displays the menu for the user to alter the database entries
     displayMenu(dbReq);
     
     return;
 }
-
+//Calls deleteDBentry on all entrys in the DB
 void clearDB(){
     int i;
     
@@ -327,6 +341,7 @@ void clearDB(){
  * so the databases can be cleaned up
  */
 
+//Clears all the records in the database clearing the map
 void sig_handler(int sig){
     
     clearDB();
@@ -334,6 +349,7 @@ void sig_handler(int sig){
     exit(0);
 }
 
+// Handles reaping the child process used for sending data to the server
 void sigchld_handler(int sig){
     
     //printf("One of your children has closed, time to reap");
