@@ -1,13 +1,13 @@
 CC=gcc
 CFLAGS=-I./src/
-TARGETS=run
+TARGETS=datamap
 DEPS =./lib/cJSON.h
-OBJ=./src/datamap.o ./lib/cJSON.o ./src/DBfunctions.o ./src/connection.o
+OBJ=./src/datamap.o ./lib/cJSON.o #./src/DBfunctions.o ./src/connection.o
 
 %.o: %.c $(DEPS)
 	$(CC) -c -o $@ $< $(CFLAGS)
 
-run: $(OBJ)
+datamap: $(OBJ)
 	gcc -o $@ $^ $(CFLAGS) -lm -lssl
 
 DBfunctions: ./src/DBfunctions.c
@@ -16,10 +16,10 @@ DBfunctions: ./src/DBfunctions.c
 connection: ./src/connection.c
 	gcc -o connection ./src/connection.c -lssl -lm
 
-datamap: ./src/datamap.c
-	gcc -o datamap ./src/datamap.c -lssl -lm
+#datamap: ./src/datamap.c
+#	gcc -o datamap ./src/datamap.c -lssl -lm
 
 clean:
 	rm -f $(TARGETS) lib/*.o src/*.o
 
-
+#try this one
