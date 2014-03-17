@@ -16,7 +16,7 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <errno.h>
-//#include <omp.h>
+#include <omp.h>
 #include "cJSON.h"
 #include "DBfunctions.c"
 
