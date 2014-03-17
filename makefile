@@ -8,13 +8,13 @@ OBJ=./src/datamap.o ./lib/cJSON.o #./src/DBfunctions.o ./src/connection.o
 	$(CC) -c -o $@ $< $(CFLAGS)
 
 datamap: $(OBJ)
-	gcc -o $@ $^ $(CFLAGS) -lm -lssl
+	gcc -o $@ $^ $(CFLAGS) -lm -lssl -fopenmp
 
 DBfunctions: ./src/DBfunctions.c
 	gcc -o DBfunctions ./src/DBfunctions.c -lssl -lm
 
 connection: ./src/connection.c
-	gcc -o connection ./src/connection.c -lssl -lm
+	gcc -o connection ./src/connection.c -lssl -lm 
 
 #datamap: ./src/datamap.c
 #	gcc -o datamap ./src/datamap.c -lssl -lm
