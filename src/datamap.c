@@ -53,8 +53,8 @@ char *colNames[5][5] = {
 int colIndex[5][5] = {
     
     { 1, 3, 19, 20, 21},
-    { 4, 6, 7,   0,  0},
-    { 1, 3, 4,   0,  0},
+    { 4, 6, 7,   9,  10},
+    { 1, 3, 4,   5,  6},
     { 1, 2, 3,   4,  5},
     { 1, 3, 5,   6,  7}
 };
@@ -86,7 +86,7 @@ int main(void)
     int dbRequest[MAX_DATABASE]; // Stores the users request for the databases to be displayed
     char** objectIDs = malloc(MAX_DATABASE * sizeof(char*)); // Stores the current Object IDs that are submited in DB, for deletion
     
-    void omp_set_num_threads(num_threads); 
+    //omp_set_num_threads(num_threads);
 
     signal(SIGINT,  sig_handler);   /* ctrl-c */
     signal(SIGTSTP, sig_handler); /* ctrl-z */
