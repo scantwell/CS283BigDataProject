@@ -17,7 +17,7 @@ char *createDBentry(char *body){
     char* objID;
     
     // sets the header
-	char* header = "PUT /v1/app/8b98552e5ad6425283215ea4d4339f7d/text HTTP/1.1\r\nHost: www.cloudmine.me\r\nX-CloudMine-ApiKey: 4a1bbce6b8864246a52262fe920dad52\r\nContent-Type: application/json\r\nContent-Length: ";
+	char* header = "PUT /v1/app/" APP KEY "/text HTTP/1.1\r\nHost: www.cloudmine.me\r\nX-CloudMine-ApiKey: 4a1bbce6b8864246a52262fe920dad52\r\nContent-Type: application/json\r\nContent-Length: ";
     
     // find the length of the body arg
     int blen = strlen(body);
@@ -63,7 +63,7 @@ char *createDBentry(char *body){
 void deleteDBentry(char *key){
     
     // inits the headers with the keys
-    char* headerp1 = "DELETE /v1/app/8b98552e5ad6425283215ea4d4339f7d/data?keys=";
+    char* headerp1 = "DELETE /v1/app/" APP KEY "/data?keys=";
     char* headerp2 = " HTTP/1.1\r\nHost: www.cloudmine.me\r\nX-CloudMine-ApiKey: 4a1bbce6b8864246a52262fe920dad52\r\n\r\n";
 
     // init a buffer to hold the content
